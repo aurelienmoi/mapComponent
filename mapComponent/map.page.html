@@ -1,0 +1,22 @@
+<ion-header>
+  <ion-toolbar class="kickBg">
+    <ion-title class="icon whiteSmoke">KickMap</ion-title>
+    <ion-buttons slot="end">
+      <ion-menu-button class="lightKick" autoHide='false'>
+        <ion-icon class="settingBtn" name="settings"></ion-icon>
+      </ion-menu-button>
+    </ion-buttons>
+    <ion-buttons slot="start">
+      <ion-button routerLink="/dashboard" class="lightKick" autoHide='false'>
+        <ion-icon class="settingBtn" name="ios-arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<app-top-toolbar></app-top-toolbar>
+
+<ion-content class="noScroll">
+  <div class="map match-parent" id="map"></div>
+  <app-nav-bar></app-nav-bar>
+</ion-content>
