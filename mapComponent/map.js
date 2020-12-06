@@ -1,63 +1,70 @@
-const User = require('../Models/userModels.js'); // I used mongoose for my project, I cant post the who server side code as its used to a future production project, but you can get
-                                                // the flow of this component below
+const User = require('../Models/userModels.js');
 
 
 module.exports = {
 
 
     async putCoordinates(req, res) {
+        console.log(req.body.coordinates);
 
-        await User.updateOne({
+        await User.findOne({_id : req.decoded.id}).then(result => {
+            let userpseudo = result.pseudo;
 
-            _id: req.decoded.id,
-        },
-            {
-                geoJson: {
-                    "type": "FeatureCollection",
-                    "features": [
+             User.updateOne({
+
+                _id: req.decoded.id,
+            },
+                {
+                    geoJson: {
+                        "type": "FeatureCollection",
+                        "features":
                         {
                             "type": "Feature",
+                            "properties": { "userId": req.decoded.id, "pseudo": userpseudo },
                             "geometry": {
                                 "type": "Point",
                                 "coordinates": req.body.coordinates
                             }
                         }
-                    ]
 
-                }
-            }).then(() => {
-                res.status(200).json({ message: "coordinates updated correctly" });
-            }).catch(err => {
-                res.status(500).json({ message: 'Error updating coordinates' })
-            })
 
-    },
+                    }
+                }).then(() => {
+                    res.status(200).json({ message: "coordinates updated correctly" });
+                }).catch(err => {
+                    res.status(500).json({ message: 'Error updating coordinates' })
+                })
+
+        })},
 
 
     async getCoordinates(req, res) {
 
+        console.log("request on good endpoint");
 
 
-        User.find({}, { geoJson: 1, _id: 0 }).then(result => {
+        User.find({ geoJson: { $exists: true, $not: { $size: 0 } } }).then(result => {
 
 
             let object1 = {
                 "type": "FeatureCollection",
                 "features": [
-                    { "type": "Feature", "geometry": { "type": "Point", "coordinates": [12, 12] } }
+                    { "type": "Feature", "properties": { "description": "<p>myowndescription<p>" }, "geometry": { "type": "Point", "coordinates": [-0.4, 49] } } //initializing with a test point to check if the cluster works
 
                 ]
             };
+            for (let i = 0; i < result.length; i++) {
+                object1.features.push(result[i].geoJson.features)
 
-            object1.features.push(
-                result[10].geoJson.features
-            );
+            }
+
+
+
 
             console.log(object1.features);
-            //console.log(result);
+
             if (object1.features[0]) {
 
-                // console.log("ici le resullllllltaat",result)
                 res.status(200).json({ result: result, object1: object1 });
             }
 
@@ -70,6 +77,18 @@ module.exports = {
 
 
 
+
+    },
+
+    async getUserCoordinates(req, res) {
+        console.log(req.params.userId);
+
+
+        await User.findOne({ _id: req.params.userId }, {"_id" : 0, "geoJson" : 1}).then(result => {
+            res.send({result})
+        } ).catch(err => {
+            res.send('error getting user geoJson')
+        })
 
     }
 
